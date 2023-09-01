@@ -7,7 +7,13 @@ import wenetruntime as wenet
 torch.manual_seed(777)  # for lint
 
 wenet.set_log_level(2)
-decoder = wenet.Decoder(lang='chs')
+decoder = wenet.Decoder(lang='chs',
+                        nbest=5,
+                        enable_timestamp=True,
+                        context=['宜享花','榕树','小辉贷'],
+                        context_score=3.0,
+                        model_dir='E:\\wenet\\pretrained\\runtime\\wenetspeech_u2pp_conformer_libtorch\\20220506_u2pp_conformer_libtorch')
+                        # model_dir='E:\\wenet\\pretrained\\runtime\\aishell_u2pp_conformer_libtorch\\aishell_u2pp_conformer_libtorch')
 
 def recognition(audio):
     sr, y = audio

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash /usr/bin/python
 
 # Copyright 2019 Mobvoi Inc. All Rights Reserved.
 . ./path.sh || exit 1;
@@ -47,6 +47,7 @@ train_set=train
 train_config=conf/train_conformer.yaml
 cmvn=true
 dir=exp/conformer
+#checkpoint=exp/conformer/9.pt
 checkpoint=
 num_workers=8
 prefetch=500
@@ -67,6 +68,7 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
   echo "stage -1: Data Download"
   local/download_and_untar.sh ${data} ${data_url} data_aishell
   local/download_and_untar.sh ${data} ${data_url} resource_aishell
+  readlink -f $(which python)
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
@@ -116,6 +118,9 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     fi
   done
 fi
+
+export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+echo $CUDA_VISIBLE_DEVICES
 
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   mkdir -p $dir
