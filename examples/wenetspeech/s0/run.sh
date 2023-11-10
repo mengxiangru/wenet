@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash /usr/bin/python
 
 # Copyright 2021  Mobvoi Inc(Author: Di Wu, Binbin Zhang)
 #                 NPU, ASLP Group (Author: Qijie Shao)
@@ -17,9 +17,11 @@ num_nodes=1
 node_rank=0
 
 # Use your own data path. You need to download the WenetSpeech dataset by yourself.
-wenetspeech_data_dir=/ssd/nfs07/binbinzhang/wenetspeech
+#wenetspeech_data_dir=/ssd/nfs07/binbinzhang/wenetspeech
+wenetspeech_data_dir=/opt/WenetSpeech/DATA_UNTAR_DIRECTORY
 # Make sure you have 1.2T for ${shards_dir}
-shards_dir=/ssd/nfs06/unified_data/wenetspeech_shards
+#shards_dir=/ssd/nfs06/unified_data/wenetspeech_shards
+shards_dir=/data/wenetspeech_shards
 
 # WenetSpeech training set
 set=L
@@ -27,15 +29,16 @@ train_set=train_`echo $set | tr 'A-Z' 'a-z'`
 dev_set=dev
 test_sets="test_net test_meeting"
 
-train_config=conf/train_conformer.yaml
+train_config=conf/train_squeezeformer.yaml
+#checkpoint=exp/conformer/25.pt
 checkpoint=
 cmvn=true
 cmvn_sampling_divisor=20 # 20 means 5% of the training data to estimate cmvn
-dir=exp/conformer
+dir=exp/squeezeformer
 
 decode_checkpoint=
 average_checkpoint=true
-average_num=10
+average_num=25
 decode_modes="attention_rescoring ctc_greedy_search"
 
 . tools/parse_options.sh || exit 1;
@@ -84,7 +87,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     sampling_size=$((full_size / cmvn_sampling_divisor))
     shuf -n $sampling_size data/$train_set/wav.scp \
       > data/$train_set/wav.scp.sampled
-    python3 tools/compute_cmvn_stats.py \
+    python tools/compute_cmvn_stats.py \
     --num_workers 16 \
     --train_config $train_config \
     --in_scp data/$train_set/wav.scp.sampled \
@@ -203,6 +206,6 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
   echo "Export the best model you want"
   python wenet/bin/export_jit.py \
     --config $dir/train.yaml \
-    --checkpoint $dir/avg_${average_num}.pt \
+    --checkpoint $dir/avg${average_num}.pt \
     --output_file $dir/final.zip
 fi
